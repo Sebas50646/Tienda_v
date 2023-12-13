@@ -1,5 +1,6 @@
 package com.tienda.controller;
 
+import com.tienda.domain.Categoria;
 import com.tienda.domain.Producto;
 import com.tienda.service.CategoriaService;
 import com.tienda.service.ProductoService;
@@ -14,8 +15,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 @Controller
-@RequestMapping("/producto")
-public class ProductoController {
+@RequestMapping("/pruebas")
+public class PruebasController {
 
     @Autowired
     private ProductoService productoService;
@@ -31,39 +32,19 @@ public class ProductoController {
         var categorias = categoriaService.getCategorias(false);
         model.addAttribute("categorias", categorias);
         
-        return "/producto/listado";
+        return "/pruebas/listado";
     }
-
-    @GetMapping("/eliminar/{idProducto}")
-    public String eliminar(Producto producto) {
-        productoService.delete(producto);
-        return "redirect:/producto/listado";
-    }
-
-    @GetMapping("/modificar/{idProducto}")
-    public String modificar(Producto producto, Model model) {
-        producto = productoService.getProducto(producto);
-        model.addAttribute("producto", producto);
-        return "/producto/modifica";
-    }
-
-    @Autowired
-    private FirebaseStorageService firebaseStorageService;
-
-    @PostMapping("/guardar")
-    public String guardar(Producto producto,
-            @RequestParam("imagenFile") MultipartFile imagenFile) {
-        if (!imagenFile.isEmpty()) {
-            productoService.save(producto);
-            String ruta = firebaseStorageService.cargaImagen(
-                    imagenFile,
-                    "producto",
-                    producto.getIdProducto());
-            producto.setRutaImagen(ruta);
-        }
+    
+    @GetMapping("/listado/{idCategoria}")
+    public String listado(Model model, Categoria categoria) {
+        var catego = categoriaService.getCategoria(categoria);
+        var productos = catego.getProductos();
+        model.addAttribute("productos", productos);
+        model.addAttribute("totalProductos", productos.size());
         
-        productoService.save(producto);
-        return "redirect:/producto/listado";
+        var categorias = categoriaService.getCategorias(false);
+        model.addAttribute("categorias", categorias);
+        
+        return "/pruebas/listado";
     }
-
 }
